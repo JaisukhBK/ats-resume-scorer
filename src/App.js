@@ -129,6 +129,7 @@ function ProgressBar({ step, dark }) {
     { label: 'Complete!', pct: 100 },
   ];
   const current = steps[step] || steps[0];
+  // eslint-disable-next-line no-unused-vars
   const barBg = dark ? '#374151' : '#E2E8F0';
   const trackBg = dark ? '#1F2937' : '#F1F5F9';
 
