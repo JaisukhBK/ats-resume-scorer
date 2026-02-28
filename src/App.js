@@ -183,7 +183,6 @@ function ScoreCard({ originalScore, tailoredScore, dark }) {
       padding: '12px 14px',
       boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
       border: dark ? '1px solid #374151' : '1px solid #E2E8F0',
-      height: '100%',
     }}>
       <ScoreRow label="Original Score" score={originalScore} isLast={tailoredScore === null} />
 
@@ -575,7 +574,7 @@ Rules:
               : (isMobile ? '1fr' : '1fr 1fr'),
             gap: '14px',
             marginBottom: '14px',
-            alignItems: 'stretch',
+            alignItems: 'start',
           }}>
             {/* JD */}
             <div style={{ ...card, marginBottom: 0 }}>
