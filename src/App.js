@@ -135,121 +135,69 @@ function ProgressBar({ step, dark }) {
   );
 }
 
-// ── Score Card ────────────────────────────────────────────────────────────────
-// Stacks Original → Tailored → Boosted vertically to fit the 200px sidebar column.
-// Boosted slot only appears after Boost is run.
-function ScoreCard({ originalScore, tailoredScore, boostedScore, isMobile, dark }) {
+// ── Score Card — Original + Tailored only ─────────────────────────────────────
+function ScoreCard({ originalScore, tailoredScore, isMobile, dark }) {
   if (originalScore === null) return null;
 
-  const ScoreRow = ({ label, score, accentColor, isLast }) => {
-    const color = accentColor || getScoreColor(score);
-    const tag = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : 'Needs work';
-    return (
+  const ScoreSlot = ({ label, score }) => (
+    <div style={{ textAlign: 'center', flex: 1 }}>
       <div style={{
-        paddingBottom: isLast ? 0 : '10px',
-        marginBottom: isLast ? 0 : '10px',
-        borderBottom: isLast ? 'none' : `1px solid ${dark ? '#374151' : '#F1F5F9'}`,
+        fontSize: '10px', fontWeight: '700', color: dark ? '#6B7280' : '#64748B',
+        textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px',
+      }}>{label}</div>
+      <div style={{
+        fontSize: isMobile ? '38px' : '48px', fontWeight: '800',
+        color: getScoreColor(score), lineHeight: 1, marginBottom: '8px',
+      }}>{score}%</div>
+      <div style={{
+        background: dark ? '#374151' : '#F1F5F9',
+        borderRadius: '20px', height: '6px',
+        maxWidth: '120px', margin: '0 auto 6px', overflow: 'hidden',
       }}>
-        {/* Label */}
         <div style={{
-          fontSize: '9px', fontWeight: '700', color: dark ? '#6B7280' : '#94A3B8',
-          textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px',
-        }}>{label}</div>
-
-        {/* Score + bar row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            fontSize: '30px', fontWeight: '800', color, lineHeight: 1, flexShrink: 0,
-          }}>{score}%</div>
-          <div style={{ flex: 1 }}>
-            <div style={{
-              background: dark ? '#374151' : '#F1F5F9',
-              borderRadius: '20px', height: '5px', overflow: 'hidden', marginBottom: '3px',
-            }}>
-              <div style={{
-                background: color, height: '100%', width: `${score}%`,
-                borderRadius: '20px', transition: 'width 1s ease',
-              }} />
-            </div>
-            <div style={{ fontSize: '9px', color: dark ? '#9CA3AF' : '#64748B' }}>{tag}</div>
-          </div>
-        </div>
+          background: getScoreColor(score), height: '100%', width: `${score}%`,
+          borderRadius: '20px', transition: 'width 1s ease',
+        }} />
       </div>
-    );
-  };
-
-  const hasBoost = boostedScore !== null;
-  const hasTailored = tailoredScore !== null;
+      <div style={{ fontSize: '11px', color: dark ? '#9CA3AF' : '#64748B' }}>
+        {score >= 80 ? '🎉 Excellent' : score >= 60 ? '⚡ Good' : '⚠️ Needs work'}
+      </div>
+    </div>
+  );
 
   return (
     <div style={{
       background: dark ? '#1F2937' : 'white',
-      borderRadius: '12px', padding: '14px',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
-      border: dark ? '1px solid #374151' : 'none',
-      marginBottom: isMobile ? '14px' : 0,
-      width: '100%',
+      borderRadius: '12px',
+      padding: isMobile ? '16px' : '20px 28px',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+      border: dark ? '1px solid #374151' : '1px solid #E2E8F0',
+      marginBottom: '14px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
     }}>
-      <ScoreRow
-        label="Original"
-        score={originalScore}
-        isLast={!hasTailored && !hasBoost}
-      />
+      <ScoreSlot label="Original Score" score={originalScore} />
 
-      {hasTailored && (
+      {tailoredScore !== null && (
         <>
-          {/* Arrow between rows */}
+          {/* Arrow divider */}
           <div style={{
-            textAlign: 'center', fontSize: '12px',
-            color: dark ? '#4B5563' : '#CBD5E1',
-            margin: '-4px 0 2px',
-          }}>↓</div>
-          <ScoreRow
-            label="Tailored"
-            score={tailoredScore}
-            isLast={!hasBoost}
-          />
-        </>
-      )}
-
-      {hasBoost && (
-        <>
-          <div style={{
-            textAlign: 'center', fontSize: '12px',
-            color: dark ? '#4B5563' : '#CBD5E1',
-            margin: '-4px 0 2px',
-          }}>↓</div>
-          <ScoreRow
-            label="Boosted"
-            score={boostedScore}
-            accentColor="#7C3AED"
-            isLast={true}
-          />
-        </>
-      )}
-
-      {/* Delta badges */}
-      {hasTailored && (
-        <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div style={{
-            background: dark ? '#064E3B' : '#ECFDF5',
-            color: '#10B981', padding: '3px 8px',
-            borderRadius: '20px', fontSize: '10px', fontWeight: '700',
-            textAlign: 'center',
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            gap: '6px', flexShrink: 0, padding: '0 8px',
           }}>
-            +{tailoredScore - originalScore}% tailored
-          </div>
-          {hasBoost && (
+            <div style={{ color: dark ? '#4B5563' : '#CBD5E1', fontSize: '22px' }}>→</div>
             <div style={{
-              background: dark ? '#2D1657' : '#F5F3FF',
-              color: '#7C3AED', padding: '3px 8px',
+              background: dark ? '#064E3B' : '#ECFDF5',
+              color: '#10B981', padding: '2px 10px',
               borderRadius: '20px', fontSize: '10px', fontWeight: '700',
-              textAlign: 'center',
+              whiteSpace: 'nowrap',
             }}>
-              +{boostedScore - originalScore}% total
+              +{tailoredScore - originalScore}% improvement
             </div>
-          )}
-        </div>
+          </div>
+          <ScoreSlot label="Tailored Score" score={tailoredScore} />
+        </>
       )}
     </div>
   );
@@ -325,7 +273,6 @@ function InterviewQuestionCard({ q, index, dark }) {
       boxShadow: open ? '0 4px 16px rgba(0,0,0,0.1)' : '0 1px 4px rgba(0,0,0,0.05)',
       transition: 'box-shadow 0.2s',
     }}>
-      {/* Question header */}
       <div
         onClick={() => setOpen(o => !o)}
         style={{
@@ -363,11 +310,8 @@ function InterviewQuestionCard({ q, index, dark }) {
         }}>▾</div>
       </div>
 
-      {/* Expanded STAR content */}
       {open && (
         <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${dark ? '#374151' : '#F1F5F9'}` }}>
-
-          {/* Why they ask */}
           <div style={{
             margin: '12px 0 14px', padding: '10px 14px',
             background: dark ? '#0F172A' : '#F8FAFC',
@@ -377,7 +321,6 @@ function InterviewQuestionCard({ q, index, dark }) {
             <span style={{ fontWeight: '700' }}>💡 Why they ask: </span>{q.whyAsked}
           </div>
 
-          {/* STAR grid */}
           <div style={{ fontSize: '11px', fontWeight: '700', color: dark ? '#6B7280' : '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
             STAR Answer Framework
           </div>
@@ -394,7 +337,6 @@ function InterviewQuestionCard({ q, index, dark }) {
             })}
           </div>
 
-          {/* Key phrases */}
           {q.keyPhrases?.length > 0 && (
             <div>
               <div style={{ fontSize: '11px', fontWeight: '700', color: dark ? '#6B7280' : '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>
@@ -431,36 +373,29 @@ export default function App() {
   const [targetScoreInput, setTargetScoreInput] = useState('90');
   const [boostLoading, setBoostLoading] = useState(false);
   const [coverLoading, setCoverLoading] = useState(false);
-
-  // ── Section D state ──────────────────────────────────────────────────────────
   const [interviewPrep, setInterviewPrep] = useState(null);
   const [interviewLoading, setInterviewLoading] = useState(false);
 
-  // ── Boosted score state ───────────────────────────────────────────────────────
-  const [boostedScore, setBoostedScore] = useState(null);
-  const [originalTailoredScore, setOriginalTailoredScore] = useState(null);
-
-  // ── Theme tokens ──────────────────────────────────────────────────────────────
   const D = {
-    bg:          dark ? '#111827' : '#F1F5F9',
-    card:        dark ? '#1F2937' : 'white',
-    cardBorder:  dark ? '1px solid #374151' : 'none',
-    text:        dark ? '#F9FAFB' : '#1A1A1A',
-    subtext:     dark ? '#9CA3AF' : '#64748B',
-    label:       dark ? '#93C5FD' : '#1A3F6F',
-    input:       dark ? '#111827' : '#F8FAFC',
-    inputBorder: dark ? '#374151' : '#E2E8F0',
-    inputText:   dark ? '#F9FAFB' : '#1E293B',
-    divider:     dark ? '#374151' : '#F1F5F9',
-    shadow:      dark ? '0 2px 12px rgba(0,0,0,0.4)' : '0 2px 12px rgba(0,0,0,0.06)',
-    previewBg:   dark ? '#111827' : '#F8FAFC',
+    bg:            dark ? '#111827' : '#F1F5F9',
+    card:          dark ? '#1F2937' : 'white',
+    cardBorder:    dark ? '1px solid #374151' : 'none',
+    text:          dark ? '#F9FAFB' : '#1A1A1A',
+    subtext:       dark ? '#9CA3AF' : '#64748B',
+    label:         dark ? '#93C5FD' : '#1A3F6F',
+    input:         dark ? '#111827' : '#F8FAFC',
+    inputBorder:   dark ? '#374151' : '#E2E8F0',
+    inputText:     dark ? '#F9FAFB' : '#1E293B',
+    divider:       dark ? '#374151' : '#F1F5F9',
+    shadow:        dark ? '0 2px 12px rgba(0,0,0,0.4)' : '0 2px 12px rgba(0,0,0,0.06)',
+    previewBg:     dark ? '#111827' : '#F8FAFC',
     previewBorder: dark ? '#374151' : '#E2E8F0',
   };
 
-  const card      = { background: D.card, borderRadius: '12px', padding: isMobile ? '14px' : '18px', boxShadow: D.shadow, border: D.cardBorder, marginBottom: '14px' };
-  const textarea  = { width: '100%', height: isMobile ? '130px' : '160px', padding: '10px', borderRadius: '8px', border: `1.5px solid ${D.inputBorder}`, fontSize: '12px', fontFamily: 'Segoe UI', resize: 'vertical', outline: 'none', boxSizing: 'border-box', lineHeight: '1.5', background: D.input, color: D.inputText };
+  const card       = { background: D.card, borderRadius: '12px', padding: isMobile ? '14px' : '18px', boxShadow: D.shadow, border: D.cardBorder, marginBottom: '14px' };
+  const textarea   = { width: '100%', height: isMobile ? '130px' : '160px', padding: '10px', borderRadius: '8px', border: `1.5px solid ${D.inputBorder}`, fontSize: '12px', fontFamily: 'Segoe UI', resize: 'vertical', outline: 'none', boxSizing: 'border-box', lineHeight: '1.5', background: D.input, color: D.inputText };
   const labelStyle = { fontSize: '13px', fontWeight: '700', color: D.label, display: 'block', marginBottom: '6px' };
-  const btn       = (bg, color, border) => ({ padding: '7px 14px', background: bg, border: border || 'none', borderRadius: '8px', fontSize: '11px', fontWeight: '600', color, cursor: 'pointer' });
+  const btn        = (bg, color, border) => ({ padding: '7px 14px', background: bg, border: border || 'none', borderRadius: '8px', fontSize: '11px', fontWeight: '600', color, cursor: 'pointer' });
   const sectionBanner = (text, color) => (
     <div style={{ background: color, borderRadius: '10px', padding: '11px 16px', marginBottom: '14px' }}>
       <div style={{ color: 'white', fontWeight: '800', fontSize: isMobile ? '13px' : '14px' }}>{text}</div>
@@ -472,7 +407,7 @@ export default function App() {
   async function analyzeResume() {
     if (!jd.trim() || !resume.trim()) { setErrorMsg('Please provide both the job description and your resume.'); return; }
     setLoading(true); setResult(null); setTailored(null); setTailoredScore(null);
-    setCoverLetter(null); setInterviewPrep(null); setBoostedScore(null); setOriginalTailoredScore(null); setErrorMsg(''); setProgressStep(0);
+    setCoverLetter(null); setInterviewPrep(null); setErrorMsg(''); setProgressStep(0);
     try {
       const aText = await callGroq(`You are an expert ATS specialist. Analyze resume vs JD. Return JSON only — no markdown, no backticks.
 JOB DESCRIPTION: ${jd}
@@ -530,11 +465,6 @@ Rules: 3-4 paragraphs, professional tone, match JD keywords, real experience onl
     const finalTarget = Math.min(99, Math.max(50, Number(targetScoreInput) || 90));
     if (!tailored || !jd) return;
     setBoostLoading(true); setErrorMsg('');
-
-    // Snapshot the current tailored score BEFORE boost overwrites tailoredScore state
-    // This lets the ScoreCard show distinct Tailored vs Boosted values
-    const preboostScore = tailoredScore?.matchScore ?? null;
-
     try {
       const boostedText = await callGroq(`Improve this resume to achieve ${finalTarget}%+ ATS score.
 JOB DESCRIPTION: ${jd}
@@ -546,12 +476,7 @@ Rules: target ${finalTarget}%+, TRUTHFUL, include missing keywords, Arial 10pt, 
 JOB DESCRIPTION: ${jd}
 RESUME: ${boostedText}
 Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<list>],"overallFeedback":"<2-3 sentences>"}`);
-      const boostedResult = JSON.parse(rText.replace(/```json|```/g, '').trim());
-      setTailoredScore(boostedResult);
-      // Store pre-boost tailored score so ScoreCard can show it as "Tailored"
-      setOriginalTailoredScore(preboostScore);
-      // Store the new boosted score as "Boosted"
-      setBoostedScore(boostedResult.matchScore);
+      setTailoredScore(JSON.parse(rText.replace(/```json|```/g, '').trim()));
     } catch (err) { setErrorMsg('❌ Boost failed: ' + err.message); }
     setBoostLoading(false);
   }
@@ -649,7 +574,7 @@ Rules:
               padding: '8px 14px', borderRadius: '20px',
               background: dark ? '#374151' : '#E2E8F0', border: 'none', cursor: 'pointer',
               fontSize: '13px', fontWeight: '600', color: dark ? '#F9FAFB' : '#475569',
-              display: 'flex', alignItems: 'center', gap: '6px'
+              display: 'flex', alignItems: 'center', gap: '6px',
             }}>
               {dark ? '☀️ Light' : '🌙 Dark'}
             </button>
@@ -659,7 +584,7 @@ Rules:
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
           {/* ── INPUTS ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 220px', gap: '14px', marginBottom: '14px', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '14px', marginBottom: '14px', alignItems: 'start' }}>
             <div style={{ ...card, marginBottom: 0 }}>
               <label style={labelStyle}>📋 Job Description</label>
               <textarea style={textarea} value={jd} onChange={e => setJd(e.target.value)} placeholder="Paste the full job description here..." />
@@ -674,17 +599,6 @@ Rules:
               <div style={{ fontSize: '11px', color: D.subtext, textAlign: 'center', margin: '5px 0 2px' }}>— or upload a file —</div>
               <FileUploadBox onFileRead={text => setResume(text)} dark={dark} />
             </div>
-            {result && (
-              <div style={isMobile ? {} : { marginBottom: 0 }}>
-                <ScoreCard
-                  originalScore={result?.matchScore ?? null}
-                  tailoredScore={originalTailoredScore ?? tailoredScore?.matchScore ?? null}
-                  boostedScore={boostedScore}
-                  isMobile={isMobile}
-                  dark={dark}
-                />
-              </div>
-            )}
           </div>
 
           {/* ── ERROR ── */}
@@ -703,7 +617,7 @@ Rules:
               color: 'white', border: 'none', borderRadius: '10px',
               fontSize: '14px', fontWeight: '700',
               cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: loading ? 'none' : '0 4px 14px rgba(30,64,175,0.3)'
+              boxShadow: loading ? 'none' : '0 4px 14px rgba(30,64,175,0.3)',
             }}>
               {loading ? '⏳ Analyzing...' : '🤖 Analyze & Tailor My Resume'}
             </button>
@@ -713,7 +627,15 @@ Rules:
           {/* ── RESULTS ── */}
           {result && (
             <>
-              {/* ════════════════════════════════════════ SECTION A ══ */}
+              {/* ── Score Card — full width above Section A ── */}
+              <ScoreCard
+                originalScore={result?.matchScore ?? null}
+                tailoredScore={tailoredScore?.matchScore ?? null}
+                isMobile={isMobile}
+                dark={dark}
+              />
+
+              {/* ════════════════════ SECTION A ══ */}
               {sectionBanner('📊 Section A — Original Resume Analysis', '#1A3F6F')}
 
               <div style={{ ...card, background: dark ? '#1E3A5F' : '#EFF6FF', borderLeft: '4px solid #3B82F6' }}>
@@ -753,7 +675,7 @@ Rules:
                 </p>
               </div>
 
-              {/* ════════════════════════════════════════ SECTION B ══ */}
+              {/* ════════════════════ SECTION B ══ */}
               {tailored && tailoredScore && (
                 <>
                   {sectionBanner('🎯 Section B — AI Custom Tailored Resume', '#10B981')}
@@ -783,7 +705,7 @@ Rules:
                       <button onClick={boostScore} disabled={boostLoading} style={{
                         padding: '8px 18px', background: boostLoading ? '#6B7280' : 'linear-gradient(135deg, #7C3AED, #8B5CF6)',
                         color: 'white', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
-                        cursor: boostLoading ? 'not-allowed' : 'pointer', width: isMobile ? '100%' : 'auto', marginTop: isMobile ? '6px' : 0
+                        cursor: boostLoading ? 'not-allowed' : 'pointer', width: isMobile ? '100%' : 'auto', marginTop: isMobile ? '6px' : 0,
                       }}>{boostLoading ? '⏳ Boosting...' : `🚀 Boost to ${targetScoreInput || 90}%`}</button>
                     </div>
                   </div>
@@ -813,21 +735,15 @@ Rules:
                       {tailored}
                     </pre>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '14px', marginTop: '6px' }}>
-                      <span style={{ fontSize: '10px', color: D.subtext }}>
-                        {tailored.length.toLocaleString()} characters
-                      </span>
-                      <span style={{ fontSize: '10px', color: D.subtext }}>
-                        {tailored.trim().split(/\s+/).filter(Boolean).length.toLocaleString()} words
-                      </span>
-                      <span style={{ fontSize: '10px', color: D.subtext }}>
-                        {tailored.split('\n').length.toLocaleString()} lines
-                      </span>
+                      <span style={{ fontSize: '10px', color: D.subtext }}>{tailored.length.toLocaleString()} characters</span>
+                      <span style={{ fontSize: '10px', color: D.subtext }}>{tailored.trim().split(/\s+/).filter(Boolean).length.toLocaleString()} words</span>
+                      <span style={{ fontSize: '10px', color: D.subtext }}>{tailored.split('\n').length.toLocaleString()} lines</span>
                     </div>
                   </div>
                 </>
               )}
 
-              {/* ════════════════════════════════════════ SECTION C ══ */}
+              {/* ════════════════════ SECTION C ══ */}
               {coverLetter && (
                 <>
                   {sectionBanner('✉️ Section C — AI Generated Cover Letter', '#8B5CF6')}
@@ -851,26 +767,19 @@ Rules:
                       {coverLetter}
                     </pre>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '14px', marginTop: '6px' }}>
-                      <span style={{ fontSize: '10px', color: D.subtext }}>
-                        {coverLetter.length.toLocaleString()} characters
-                      </span>
-                      <span style={{ fontSize: '10px', color: D.subtext }}>
-                        {coverLetter.trim().split(/\s+/).filter(Boolean).length.toLocaleString()} words
-                      </span>
-                      <span style={{ fontSize: '10px', color: D.subtext }}>
-                        {coverLetter.split('\n').length.toLocaleString()} lines
-                      </span>
+                      <span style={{ fontSize: '10px', color: D.subtext }}>{coverLetter.length.toLocaleString()} characters</span>
+                      <span style={{ fontSize: '10px', color: D.subtext }}>{coverLetter.trim().split(/\s+/).filter(Boolean).length.toLocaleString()} words</span>
+                      <span style={{ fontSize: '10px', color: D.subtext }}>{coverLetter.split('\n').length.toLocaleString()} lines</span>
                     </div>
                   </div>
                 </>
               )}
 
-              {/* ════════════════════════════════════════ SECTION D ══ */}
+              {/* ════════════════════ SECTION D ══ */}
               {coverLetter && (
                 <>
                   {sectionBanner('🎯 Section D — Interview Preparation', '#0369A1')}
 
-                  {/* Generate / Regenerate button card */}
                   <div style={{ ...card, background: dark ? '#0C1929' : '#F0F9FF', borderLeft: '4px solid #0369A1' }}>
                     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: '12px' }}>
                       <div>
@@ -899,7 +808,6 @@ Rules:
                       </button>
                     </div>
 
-                    {/* Loading progress bar */}
                     {interviewLoading && (
                       <div style={{ marginTop: '14px', background: dark ? '#1E3A5F' : '#E0F2FE', borderRadius: '8px', padding: '10px 14px' }}>
                         <div style={{ fontSize: '12px', color: dark ? '#7DD3FC' : '#0369A1', fontWeight: '600', marginBottom: '6px' }}>
@@ -912,10 +820,8 @@ Rules:
                     )}
                   </div>
 
-                  {/* Results */}
                   {interviewPrep && !interviewLoading && (
                     <>
-                      {/* Key Talking Points */}
                       <div style={card}>
                         <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1', marginBottom: '12px' }}>
                           🗣️ Key Talking Points to Emphasize
@@ -940,7 +846,6 @@ Rules:
                         </div>
                       </div>
 
-                      {/* 10 Interview Questions */}
                       <div style={card}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                           <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1' }}>
@@ -953,7 +858,6 @@ Rules:
                         ))}
                       </div>
 
-                      {/* Company Research Tips */}
                       <div style={card}>
                         <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1', marginBottom: '12px' }}>
                           🔍 Company Research Tips
