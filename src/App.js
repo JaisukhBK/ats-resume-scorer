@@ -3,26 +3,17 @@ import { useState, useRef, useEffect } from 'react';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_KEY = process.env.REACT_APP_GROQ_KEY;
 
-// ── Call Groq AI ──
 async function callGroq(prompt) {
   const response = await fetch(GROQ_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${GROQ_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3
-    })
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+    body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], temperature: 0.3 })
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.error?.message || `HTTP ${response.status}`);
   return data.choices[0].message.content;
 }
 
-// ── Read file as text ──
 function readFileAsText(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -32,7 +23,6 @@ function readFileAsText(file) {
   });
 }
 
-// ── Download as Word ──
 function downloadAsWord(resumeText, filename = 'tailored_resume.docx') {
   const lines = resumeText.split('\n');
   let bodyXml = '';
@@ -72,7 +62,6 @@ function downloadAsWord(resumeText, filename = 'tailored_resume.docx') {
   });
 }
 
-// ── Download as PDF ──
 function downloadAsPDF(text, filename = 'tailored_resume.pdf') {
   const loadjsPDF = () => new Promise((resolve) => {
     if (window.jspdf) { resolve(); return; }
@@ -102,13 +91,12 @@ function downloadAsPDF(text, filename = 'tailored_resume.pdf') {
   });
 }
 
-function getScoreColor(score, dark) {
+function getScoreColor(score) {
   if (score >= 80) return '#10B981';
   if (score >= 60) return '#F59E0B';
   return '#EF4444';
 }
 
-// ── Responsive hook ──
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
@@ -119,7 +107,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-// ── Progress Bar Component ──
+// ── Progress Bar — fixed: no unused variables ──
 function ProgressBar({ step, dark }) {
   const steps = [
     { label: 'Analyzing Resume', pct: 25 },
@@ -129,22 +117,18 @@ function ProgressBar({ step, dark }) {
     { label: 'Complete!', pct: 100 },
   ];
   const current = steps[step] || steps[0];
-  // eslint-disable-next-line no-unused-vars
-  const barBg = dark ? '#374151' : '#E2E8F0';
-  const trackBg = dark ? '#1F2937' : '#F1F5F9';
+  const bgColor = dark ? '#374151' : '#E2E8F0';
 
   return (
     <div style={{ maxWidth: '500px', margin: '0 auto', textAlign: 'center' }}>
       <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#93C5FD' : '#1A3F6F', marginBottom: '10px' }}>
         {current.label}
       </div>
-      <div style={{ background: barBg, borderRadius: '20px', height: '10px', overflow: 'hidden', marginBottom: '6px' }}>
+      <div style={{ background: bgColor, borderRadius: '20px', height: '10px', overflow: 'hidden', marginBottom: '6px' }}>
         <div style={{
           background: 'linear-gradient(90deg, #1A3F6F, #3B82F6)',
-          height: '100%',
-          width: `${current.pct}%`,
-          borderRadius: '20px',
-          transition: 'width 0.6s ease'
+          height: '100%', width: `${current.pct}%`,
+          borderRadius: '20px', transition: 'width 0.6s ease'
         }} />
       </div>
       <div style={{ fontSize: '12px', color: dark ? '#6B7280' : '#94A3B8' }}>{current.pct}% complete</div>
@@ -152,26 +136,23 @@ function ProgressBar({ step, dark }) {
   );
 }
 
-// ── Score Card ──
 function ScoreCard({ originalScore, tailoredScore, isMobile, dark }) {
   if (originalScore === null) return null;
-  const bg = dark ? '#1F2937' : 'white';
-  const border = dark ? '1px solid #374151' : 'none';
   return (
     <div style={{
-      background: bg, borderRadius: '12px', padding: '16px',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.12)', border,
-      display: 'flex',
-      flexDirection: isMobile ? 'row' : 'column',
+      background: dark ? '#1F2937' : 'white', borderRadius: '12px', padding: '16px',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
+      border: dark ? '1px solid #374151' : 'none',
+      display: 'flex', flexDirection: isMobile ? 'row' : 'column',
       justifyContent: isMobile ? 'space-around' : 'center',
       alignItems: 'center', gap: isMobile ? 0 : '8px',
       marginBottom: isMobile ? '14px' : 0
     }}>
       <div style={{ textAlign: 'center', flex: isMobile ? 1 : 'unset' }}>
         <div style={{ fontSize: '10px', fontWeight: '700', color: dark ? '#6B7280' : '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>Original</div>
-        <div style={{ fontSize: isMobile ? '34px' : '42px', fontWeight: '800', color: getScoreColor(originalScore, dark), lineHeight: 1 }}>{originalScore}%</div>
+        <div style={{ fontSize: isMobile ? '34px' : '42px', fontWeight: '800', color: getScoreColor(originalScore), lineHeight: 1 }}>{originalScore}%</div>
         <div style={{ background: dark ? '#374151' : '#F1F5F9', borderRadius: '20px', height: '6px', maxWidth: '110px', margin: '6px auto 0', overflow: 'hidden' }}>
-          <div style={{ background: getScoreColor(originalScore, dark), height: '100%', width: `${originalScore}%`, borderRadius: '20px', transition: 'width 1s ease' }} />
+          <div style={{ background: getScoreColor(originalScore), height: '100%', width: `${originalScore}%`, borderRadius: '20px', transition: 'width 1s ease' }} />
         </div>
         <div style={{ fontSize: '10px', color: dark ? '#6B7280' : '#64748B', marginTop: '4px' }}>
           {originalScore >= 80 ? '🎉 Excellent' : originalScore >= 60 ? '⚡ Good' : '⚠️ Needs work'}
@@ -182,9 +163,9 @@ function ScoreCard({ originalScore, tailoredScore, isMobile, dark }) {
           <div style={{ color: dark ? '#4B5563' : '#CBD5E1', fontSize: isMobile ? '18px' : '14px', padding: isMobile ? '0 8px' : '6px 0' }}>→</div>
           <div style={{ textAlign: 'center', flex: isMobile ? 1 : 'unset' }}>
             <div style={{ fontSize: '10px', fontWeight: '700', color: dark ? '#6B7280' : '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>Tailored</div>
-            <div style={{ fontSize: isMobile ? '34px' : '42px', fontWeight: '800', color: getScoreColor(tailoredScore, dark), lineHeight: 1 }}>{tailoredScore}%</div>
+            <div style={{ fontSize: isMobile ? '34px' : '42px', fontWeight: '800', color: getScoreColor(tailoredScore), lineHeight: 1 }}>{tailoredScore}%</div>
             <div style={{ background: dark ? '#374151' : '#F1F5F9', borderRadius: '20px', height: '6px', maxWidth: '110px', margin: '6px auto 0', overflow: 'hidden' }}>
-              <div style={{ background: getScoreColor(tailoredScore, dark), height: '100%', width: `${tailoredScore}%`, borderRadius: '20px', transition: 'width 1s ease' }} />
+              <div style={{ background: getScoreColor(tailoredScore), height: '100%', width: `${tailoredScore}%`, borderRadius: '20px', transition: 'width 1s ease' }} />
             </div>
             <div style={{ fontSize: '10px', color: dark ? '#6B7280' : '#64748B', marginTop: '4px' }}>
               {tailoredScore >= 80 ? '🎉 Excellent' : tailoredScore >= 60 ? '⚡ Good' : '⚠️ Needs work'}
@@ -196,7 +177,6 @@ function ScoreCard({ originalScore, tailoredScore, isMobile, dark }) {
   );
 }
 
-// ── File Upload Box ──
 function FileUploadBox({ onFileRead, dark }) {
   const inputRef = useRef();
   const [fileName, setFileName] = useState('');
@@ -216,7 +196,8 @@ function FileUploadBox({ onFileRead, dark }) {
       style={{
         border: `2px dashed ${dragging ? '#3B82F6' : dark ? '#4B5563' : '#CBD5E1'}`,
         borderRadius: '8px', padding: '9px 12px', textAlign: 'center',
-        cursor: 'pointer', background: dragging ? (dark ? '#1E3A5F' : '#EFF6FF') : (dark ? '#111827' : '#F8FAFC'),
+        cursor: 'pointer',
+        background: dragging ? (dark ? '#1E3A5F' : '#EFF6FF') : (dark ? '#111827' : '#F8FAFC'),
         transition: 'all 0.2s', marginTop: '8px'
       }}
     >
@@ -230,7 +211,6 @@ function FileUploadBox({ onFileRead, dark }) {
   );
 }
 
-// ── Keyword Badge ──
 function KW({ text, color, bg }) {
   return <span style={{ background: bg, color, padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', display: 'inline-block', margin: '3px' }}>{text}</span>;
 }
@@ -251,7 +231,6 @@ export default function App() {
   const [boostLoading, setBoostLoading] = useState(false);
   const [coverLoading, setCoverLoading] = useState(false);
 
-  // ── Dark mode colors ──
   const D = {
     bg: dark ? '#111827' : '#F1F5F9',
     card: dark ? '#1F2937' : 'white',
@@ -271,30 +250,18 @@ export default function App() {
   const card = { background: D.card, borderRadius: '12px', padding: isMobile ? '14px' : '18px', boxShadow: D.shadow, border: D.cardBorder, marginBottom: '14px' };
   const textarea = { width: '100%', height: isMobile ? '130px' : '160px', padding: '10px', borderRadius: '8px', border: `1.5px solid ${D.inputBorder}`, fontSize: '12px', fontFamily: 'Segoe UI', resize: 'vertical', outline: 'none', boxSizing: 'border-box', lineHeight: '1.5', background: D.input, color: D.inputText };
   const labelStyle = { fontSize: '13px', fontWeight: '700', color: D.label, display: 'block', marginBottom: '6px' };
-
-  const btn = (bg, color, border = 'none') => ({
-    padding: '7px 14px', background: bg, border: border || 'none',
-    borderRadius: '8px', fontSize: '11px', fontWeight: '600',
-    color, cursor: 'pointer'
-  });
-
+  const btn = (bg, color, border) => ({ padding: '7px 14px', background: bg, border: border || 'none', borderRadius: '8px', fontSize: '11px', fontWeight: '600', color, cursor: 'pointer' });
   const banner = (text, color) => (
     <div style={{ background: color, borderRadius: '10px', padding: '11px 16px', marginBottom: '14px' }}>
       <div style={{ color: 'white', fontWeight: '800', fontSize: isMobile ? '13px' : '14px' }}>{text}</div>
     </div>
   );
+  const secTitle = (text) => <div style={{ fontSize: '13px', fontWeight: '700', color: D.label, marginBottom: '10px' }}>{text}</div>;
 
-  const secTitle = (text) => (
-    <div style={{ fontSize: '13px', fontWeight: '700', color: D.label, marginBottom: '10px' }}>{text}</div>
-  );
-
-  // ── Main Analysis ──
   async function analyzeResume() {
     if (!jd.trim() || !resume.trim()) { setErrorMsg('Please provide both the job description and your resume.'); return; }
     setLoading(true); setResult(null); setTailored(null); setTailoredScore(null); setCoverLetter(null); setErrorMsg(''); setProgressStep(0);
-
     try {
-      // Step 1 — Analyze
       setProgressStep(0);
       const aText = await callGroq(`You are an expert ATS specialist. Analyze resume vs JD. Return JSON only — no markdown, no backticks.
 JOB DESCRIPTION: ${jd}
@@ -303,7 +270,6 @@ Return exactly: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywor
       const analysis = JSON.parse(aText.replace(/```json|```/g, '').trim());
       setResult(analysis);
 
-      // Step 2 — Tailor
       setProgressStep(1);
       const tText = await callGroq(`You are an expert resume writer. Create a fully tailored resume.
 JOB DESCRIPTION: ${jd}
@@ -312,7 +278,6 @@ MISSING KEYWORDS: ${analysis.missingKeywords.join(', ')}
 Rules: Arial 10pt plain text, UPPERCASE section headers, TRUTHFUL experience, strong action verbs, quantifiable metrics, rewrite summary for JD. Return ONLY resume text.`);
       setTailored(tText.trim());
 
-      // Step 3 — Score tailored
       setProgressStep(2);
       const sText = await callGroq(`Analyze tailored resume vs JD. Return JSON only — no markdown, no backticks.
 JOB DESCRIPTION: ${jd}
@@ -321,21 +286,12 @@ Return exactly: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywor
       const scoreResult = JSON.parse(sText.replace(/```json|```/g, '').trim());
       setTailoredScore(scoreResult);
 
-      // Step 4 — Cover Letter
       setProgressStep(3);
-      const cText = await callGroq(`You are an expert cover letter writer. Write a professional cover letter based on the tailored resume and job description.
+      const cText = await callGroq(`You are an expert cover letter writer. Write a professional cover letter.
 JOB DESCRIPTION: ${jd}
 TAILORED RESUME: ${tText}
-Rules:
-- Professional business letter format
-- 3-4 paragraphs: opening hook, key experience match, specific achievements with metrics, closing call to action
-- Match the tone and keywords of the JD
-- Personalize based on actual experience in the resume — never fabricate
-- Keep it under 400 words
-- Do NOT include placeholder text like [Your Name] — use "Jaisukh Bangalore Krishne Gowda" as the name
-- Return ONLY the cover letter text`);
+Rules: Professional business letter format, 3-4 paragraphs (opening hook, key experience match, specific achievements with metrics, closing CTA), match JD tone and keywords, use real experience only — never fabricate, under 400 words, use "Jaisukh Bangalore Krishne Gowda" as the candidate name. Return ONLY the cover letter text.`);
       setCoverLetter(cText.trim());
-
       setProgressStep(4);
 
     } catch (err) {
@@ -345,7 +301,6 @@ Rules:
     setLoading(false);
   }
 
-  // ── Regenerate Cover Letter separately ──
   async function regenerateCoverLetter() {
     if (!tailored || !jd) return;
     setCoverLoading(true);
@@ -353,15 +308,12 @@ Rules:
       const cText = await callGroq(`You are an expert cover letter writer. Write a professional cover letter.
 JOB DESCRIPTION: ${jd}
 TAILORED RESUME: ${tailored}
-Rules: 3-4 paragraphs, professional tone, match JD keywords, use real experience only, under 400 words, use "Jaisukh Bangalore Krishne Gowda" as the name. Return ONLY the cover letter.`);
+Rules: 3-4 paragraphs, professional tone, match JD keywords, real experience only, under 400 words, use "Jaisukh Bangalore Krishne Gowda" as the name. Return ONLY the cover letter.`);
       setCoverLetter(cText.trim());
-    } catch (err) {
-      setErrorMsg('❌ Cover letter failed: ' + err.message);
-    }
+    } catch (err) { setErrorMsg('❌ Cover letter failed: ' + err.message); }
     setCoverLoading(false);
   }
 
-  // ── Boost Score ──
   async function boostScore() {
     const finalTarget = Math.min(99, Math.max(50, Number(targetScoreInput) || 90));
     if (!tailored || !jd) return;
@@ -409,20 +361,13 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
               Upload or paste your JD and resume — AI scores, tailors & optimizes
             </p>
           </div>
-
-          {/* Dark Mode Toggle */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-start' }}>
-            <button
-              onClick={() => setDark(d => !d)}
-              style={{
-                padding: '8px 14px', borderRadius: '20px',
-                background: dark ? '#374151' : '#E2E8F0',
-                border: 'none', cursor: 'pointer',
-                fontSize: '13px', fontWeight: '600',
-                color: dark ? '#F9FAFB' : '#475569',
-                display: 'flex', alignItems: 'center', gap: '6px'
-              }}
-            >
+            <button onClick={() => setDark(d => !d)} style={{
+              padding: '8px 14px', borderRadius: '20px',
+              background: dark ? '#374151' : '#E2E8F0', border: 'none', cursor: 'pointer',
+              fontSize: '13px', fontWeight: '600', color: dark ? '#F9FAFB' : '#475569',
+              display: 'flex', alignItems: 'center', gap: '6px'
+            }}>
               {dark ? '☀️ Light' : '🌙 Dark'}
             </button>
           </div>
@@ -432,7 +377,6 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
 
           {/* ── INPUTS ── */}
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 200px', gap: '14px', marginBottom: '14px', alignItems: 'start' }}>
-
             <div style={{ ...card, marginBottom: 0 }}>
               <label style={labelStyle}>📋 Job Description</label>
               <textarea style={textarea} value={jd} onChange={e => setJd(e.target.value)} placeholder="Paste the full job description here..." />
@@ -463,7 +407,7 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
             </div>
           )}
 
-          {/* ── ANALYZE BUTTON ── */}
+          {/* ── ANALYZE BUTTON + PROGRESS BAR ── */}
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <button onClick={analyzeResume} disabled={loading} style={{
               padding: isMobile ? '13px 32px' : '12px 52px',
@@ -476,8 +420,6 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
             }}>
               {loading ? '⏳ Analyzing...' : '🤖 Analyze & Tailor My Resume'}
             </button>
-
-            {/* ── PROGRESS BAR ── */}
             {loading && (
               <div style={{ marginTop: '18px' }}>
                 <ProgressBar step={progressStep} dark={dark} />
@@ -488,7 +430,6 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
           {/* ── RESULTS ── */}
           {result && (
             <>
-              {/* ══ SECTION A ══ */}
               {banner('📊 Section A — Original Resume Analysis', '#1A3F6F')}
 
               <div style={{ ...card, background: dark ? '#1E3A5F' : '#EFF6FF', borderLeft: '4px solid #3B82F6' }}>
@@ -521,14 +462,13 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                   {secTitle('✍️ AI Improved Summary')}
                   <button onClick={() => { navigator.clipboard.writeText(result.improvedSummary); alert('Copied!'); }}
-                    style={btn(dark ? '#1E3A5F' : '#EFF6FF', '#3B82F6', `1.5px solid #3B82F6`)}>📋 Copy</button>
+                    style={btn(dark ? '#1E3A5F' : '#EFF6FF', '#3B82F6', '1.5px solid #3B82F6')}>📋 Copy</button>
                 </div>
                 <p style={{ fontSize: '10pt', fontFamily: 'Arial, sans-serif', color: D.text, lineHeight: '1.8', background: D.previewBg, padding: '13px', borderRadius: '8px', margin: 0, border: `1px solid ${D.previewBorder}` }}>
                   {result.improvedSummary}
                 </p>
               </div>
 
-              {/* ══ SECTION B ══ */}
               {tailored && tailoredScore && (
                 <>
                   {banner('🎯 Section B — AI Custom Tailored Resume', '#10B981')}
@@ -545,7 +485,6 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
                     </div>
                   )}
 
-                  {/* Boost Score */}
                   <div style={{ ...card, background: dark ? '#1E1B4B' : '#F5F3FF', borderLeft: '4px solid #8B5CF6' }}>
                     <div style={{ fontSize: '13px', fontWeight: '700', color: '#8B5CF6', marginBottom: '8px' }}>🚀 Boost My Score</div>
                     <p style={{ fontSize: '12px', color: D.subtext, marginBottom: '12px' }}>
@@ -564,13 +503,12 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
                     </div>
                   </div>
 
-                  {/* Tailored Resume */}
                   <div style={card}>
                     <div style={{ marginBottom: '12px' }}>
                       {secTitle('📄 Your Custom Tailored Resume (Arial 10pt)')}
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
                         <button onClick={() => { navigator.clipboard.writeText(tailored); alert('Copied!'); }}
-                          style={{ ...btn(dark ? '#1E3A5F' : '#EFF6FF', '#3B82F6', `1.5px solid #3B82F6`), flex: isMobile ? '1' : 'unset' }}>📋 Copy</button>
+                          style={{ ...btn(dark ? '#1E3A5F' : '#EFF6FF', '#3B82F6', '1.5px solid #3B82F6'), flex: isMobile ? '1' : 'unset' }}>📋 Copy</button>
                         <button onClick={() => downloadAsWord(tailored)}
                           style={{ ...btn(dark ? '#1E3A5F' : '#EFF6FF', D.label, `1.5px solid ${D.label}`), flex: isMobile ? '1' : 'unset' }}>📝 Word</button>
                         <button onClick={() => downloadAsPDF(tailored)}
@@ -584,17 +522,15 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
                 </>
               )}
 
-              {/* ══ SECTION C — COVER LETTER ══ */}
               {coverLetter && (
                 <>
                   {banner('✉️ Section C — AI Generated Cover Letter', '#8B5CF6')}
-
                   <div style={card}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                       {secTitle('✉️ Your Personalized Cover Letter')}
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <button onClick={() => { navigator.clipboard.writeText(coverLetter); alert('Cover letter copied!'); }}
-                          style={{ ...btn(dark ? '#1E3A5F' : '#EFF6FF', '#3B82F6', `1.5px solid #3B82F6`), flex: isMobile ? '1' : 'unset' }}>📋 Copy</button>
+                          style={{ ...btn(dark ? '#1E3A5F' : '#EFF6FF', '#3B82F6', '1.5px solid #3B82F6'), flex: isMobile ? '1' : 'unset' }}>📋 Copy</button>
                         <button onClick={() => downloadAsPDF(coverLetter, 'cover_letter.pdf')}
                           style={{ ...btn(dark ? '#450A0A' : '#FEF2F2', '#EF4444', '1.5px solid #EF4444'), flex: isMobile ? '1' : 'unset' }}>📄 PDF</button>
                         <button onClick={() => downloadAsWord(coverLetter, 'cover_letter.docx')}
@@ -611,10 +547,8 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
                   </div>
                 </>
               )}
-
             </>
           )}
-
         </div>
       </div>
     </>
