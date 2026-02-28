@@ -127,7 +127,7 @@ function ProgressBar({ step, dark }) {
         <div style={{
           background: 'linear-gradient(90deg, #1A3F6F, #3B82F6)',
           height: '100%', width: `${current.pct}%`,
-          borderRadius: '20px', transition: 'width 0.6s ease'
+          borderRadius: '20px', transition: 'width 0.6s ease',
         }} />
       </div>
       <div style={{ fontSize: '12px', color: dark ? '#6B7280' : '#94A3B8' }}>{current.pct}% complete</div>
@@ -135,32 +135,43 @@ function ProgressBar({ step, dark }) {
   );
 }
 
-// ── Score Card — Original + Tailored only ─────────────────────────────────────
-function ScoreCard({ originalScore, tailoredScore, isMobile, dark }) {
+// ── Score Card — top-right sidebar, Original + Tailored stacked vertically ────
+function ScoreCard({ originalScore, tailoredScore, dark }) {
   if (originalScore === null) return null;
 
-  const ScoreSlot = ({ label, score }) => (
-    <div style={{ textAlign: 'center', flex: 1 }}>
+  const ScoreRow = ({ label, score, isLast }) => (
+    <div style={{
+      paddingBottom: isLast ? 0 : '8px',
+      marginBottom: isLast ? 0 : '8px',
+      borderBottom: isLast ? 'none' : `1px solid ${dark ? '#374151' : '#F1F5F9'}`,
+    }}>
       <div style={{
-        fontSize: '10px', fontWeight: '700', color: dark ? '#6B7280' : '#64748B',
-        textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px',
+        fontSize: '8px', fontWeight: '700',
+        color: dark ? '#6B7280' : '#94A3B8',
+        textTransform: 'uppercase', letterSpacing: '0.08em',
+        marginBottom: '3px',
       }}>{label}</div>
-      <div style={{
-        fontSize: isMobile ? '38px' : '48px', fontWeight: '800',
-        color: getScoreColor(score), lineHeight: 1, marginBottom: '8px',
-      }}>{score}%</div>
-      <div style={{
-        background: dark ? '#374151' : '#F1F5F9',
-        borderRadius: '20px', height: '6px',
-        maxWidth: '120px', margin: '0 auto 6px', overflow: 'hidden',
-      }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <div style={{
-          background: getScoreColor(score), height: '100%', width: `${score}%`,
-          borderRadius: '20px', transition: 'width 1s ease',
-        }} />
-      </div>
-      <div style={{ fontSize: '11px', color: dark ? '#9CA3AF' : '#64748B' }}>
-        {score >= 80 ? '🎉 Excellent' : score >= 60 ? '⚡ Good' : '⚠️ Needs work'}
+          fontSize: '26px', fontWeight: '800',
+          color: getScoreColor(score), lineHeight: 1, flexShrink: 0,
+        }}>{score}%</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            background: dark ? '#374151' : '#F1F5F9',
+            borderRadius: '20px', height: '4px',
+            overflow: 'hidden', marginBottom: '3px',
+          }}>
+            <div style={{
+              background: getScoreColor(score), height: '100%',
+              width: `${score}%`, borderRadius: '20px',
+              transition: 'width 1s ease',
+            }} />
+          </div>
+          <div style={{ fontSize: '9px', color: dark ? '#9CA3AF' : '#64748B', whiteSpace: 'nowrap' }}>
+            {score >= 80 ? '🎉 Excellent' : score >= 60 ? '⚡ Good' : '⚠️ Needs work'}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -169,34 +180,34 @@ function ScoreCard({ originalScore, tailoredScore, isMobile, dark }) {
     <div style={{
       background: dark ? '#1F2937' : 'white',
       borderRadius: '12px',
-      padding: isMobile ? '16px' : '20px 28px',
+      padding: '12px 14px',
       boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
       border: dark ? '1px solid #374151' : '1px solid #E2E8F0',
-      marginBottom: '14px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
+      height: '100%',
     }}>
-      <ScoreSlot label="Original Score" score={originalScore} />
+      <ScoreRow label="Original Score" score={originalScore} isLast={tailoredScore === null} />
 
       {tailoredScore !== null && (
         <>
-          {/* Arrow divider */}
           <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            gap: '6px', flexShrink: 0, padding: '0 8px',
-          }}>
-            <div style={{ color: dark ? '#4B5563' : '#CBD5E1', fontSize: '22px' }}>→</div>
-            <div style={{
+            textAlign: 'center', fontSize: '11px',
+            color: dark ? '#4B5563' : '#CBD5E1',
+            margin: '-2px 0 4px',
+          }}>↓</div>
+          <ScoreRow label="Tailored Score" score={tailoredScore} isLast={true} />
+          <div style={{ marginTop: '8px', textAlign: 'center' }}>
+            <span style={{
+              display: 'inline-block',
               background: dark ? '#064E3B' : '#ECFDF5',
-              color: '#10B981', padding: '2px 10px',
-              borderRadius: '20px', fontSize: '10px', fontWeight: '700',
-              whiteSpace: 'nowrap',
+              color: '#10B981',
+              padding: '2px 10px',
+              borderRadius: '20px',
+              fontSize: '9px',
+              fontWeight: '700',
             }}>
               +{tailoredScore - originalScore}% improvement
-            </div>
+            </span>
           </div>
-          <ScoreSlot label="Tailored Score" score={tailoredScore} />
         </>
       )}
     </div>
@@ -224,7 +235,7 @@ function FileUploadBox({ onFileRead, dark }) {
         border: `2px dashed ${dragging ? '#3B82F6' : dark ? '#4B5563' : '#CBD5E1'}`,
         borderRadius: '8px', padding: '9px 12px', textAlign: 'center', cursor: 'pointer',
         background: dragging ? (dark ? '#1E3A5F' : '#EFF6FF') : (dark ? '#111827' : '#F8FAFC'),
-        transition: 'all 0.2s', marginTop: '8px'
+        transition: 'all 0.2s', marginTop: '8px',
       }}
     >
       <input ref={inputRef} type="file" accept=".txt,.pdf,.doc,.docx" style={{ display: 'none' }}
@@ -246,10 +257,9 @@ function KW({ text, color, bg }) {
   );
 }
 
-// ── Interview Question Card (expandable) ──────────────────────────────────────
+// ── Interview Question Card ───────────────────────────────────────────────────
 function InterviewQuestionCard({ q, index, dark }) {
   const [open, setOpen] = useState(false);
-
   const categoryColors = {
     Behavioral:  { bg: '#DBEAFE', text: '#1D4ED8' },
     Technical:   { bg: '#D1FAE5', text: '#065F46' },
@@ -273,15 +283,12 @@ function InterviewQuestionCard({ q, index, dark }) {
       boxShadow: open ? '0 4px 16px rgba(0,0,0,0.1)' : '0 1px 4px rgba(0,0,0,0.05)',
       transition: 'box-shadow 0.2s',
     }}>
-      <div
-        onClick={() => setOpen(o => !o)}
-        style={{
-          display: 'flex', alignItems: 'flex-start', gap: '12px',
-          padding: '14px 16px', cursor: 'pointer',
-          background: open ? (dark ? '#111827' : '#F8FAFC') : 'transparent',
-          transition: 'background 0.15s',
-        }}
-      >
+      <div onClick={() => setOpen(o => !o)} style={{
+        display: 'flex', alignItems: 'flex-start', gap: '12px',
+        padding: '14px 16px', cursor: 'pointer',
+        background: open ? (dark ? '#111827' : '#F8FAFC') : 'transparent',
+        transition: 'background 0.15s',
+      }}>
         <div style={{
           minWidth: '28px', height: '28px', borderRadius: '50%',
           background: 'linear-gradient(135deg,#0369A1,#0EA5E9)',
@@ -289,21 +296,13 @@ function InterviewQuestionCard({ q, index, dark }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0, marginTop: '1px',
         }}>{index + 1}</div>
-
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', gap: '6px', marginBottom: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ background: catColor.bg, color: catColor.text, padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '700' }}>
-              {q.category}
-            </span>
-            <span style={{ background: dark ? '#374151' : '#F1F5F9', color: dark ? '#9CA3AF' : '#64748B', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '600' }}>
-              {q.difficulty}
-            </span>
+            <span style={{ background: catColor.bg, color: catColor.text, padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '700' }}>{q.category}</span>
+            <span style={{ background: dark ? '#374151' : '#F1F5F9', color: dark ? '#9CA3AF' : '#64748B', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '600' }}>{q.difficulty}</span>
           </div>
-          <div style={{ fontSize: '13px', fontWeight: '600', color: dark ? '#F9FAFB' : '#0F172A', lineHeight: '1.5' }}>
-            {q.question}
-          </div>
+          <div style={{ fontSize: '13px', fontWeight: '600', color: dark ? '#F9FAFB' : '#0F172A', lineHeight: '1.5' }}>{q.question}</div>
         </div>
-
         <div style={{
           color: dark ? '#6B7280' : '#94A3B8', fontSize: '18px', flexShrink: 0, marginTop: '2px',
           transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s',
@@ -320,7 +319,6 @@ function InterviewQuestionCard({ q, index, dark }) {
           }}>
             <span style={{ fontWeight: '700' }}>💡 Why they ask: </span>{q.whyAsked}
           </div>
-
           <div style={{ fontSize: '11px', fontWeight: '700', color: dark ? '#6B7280' : '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
             STAR Answer Framework
           </div>
@@ -336,7 +334,6 @@ function InterviewQuestionCard({ q, index, dark }) {
               );
             })}
           </div>
-
           {q.keyPhrases?.length > 0 && (
             <div>
               <div style={{ fontSize: '11px', fontWeight: '700', color: dark ? '#6B7280' : '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>
@@ -344,9 +341,7 @@ function InterviewQuestionCard({ q, index, dark }) {
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                 {q.keyPhrases.map((p, i) => (
-                  <span key={i} style={{ background: dark ? '#0C1929' : '#EFF6FF', color: dark ? '#7DD3FC' : '#0369A1', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600' }}>
-                    {p}
-                  </span>
+                  <span key={i} style={{ background: dark ? '#0C1929' : '#EFF6FF', color: dark ? '#7DD3FC' : '#0369A1', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600' }}>{p}</span>
                 ))}
               </div>
             </div>
@@ -403,7 +398,6 @@ export default function App() {
   );
   const secTitle = (text) => <div style={{ fontSize: '13px', fontWeight: '700', color: D.label, marginBottom: '10px' }}>{text}</div>;
 
-  // ── Analyze & Tailor ─────────────────────────────────────────────────────────
   async function analyzeResume() {
     if (!jd.trim() || !resume.trim()) { setErrorMsg('Please provide both the job description and your resume.'); return; }
     setLoading(true); setResult(null); setTailored(null); setTailoredScore(null);
@@ -446,7 +440,6 @@ Rules: Professional business letter format, 3-4 paragraphs (opening hook, key ex
     setLoading(false);
   }
 
-  // ── Regenerate Cover Letter ───────────────────────────────────────────────────
   async function regenerateCoverLetter() {
     if (!tailored || !jd) return;
     setCoverLoading(true);
@@ -460,7 +453,6 @@ Rules: 3-4 paragraphs, professional tone, match JD keywords, real experience onl
     setCoverLoading(false);
   }
 
-  // ── Boost Score ───────────────────────────────────────────────────────────────
   async function boostScore() {
     const finalTarget = Math.min(99, Math.max(50, Number(targetScoreInput) || 90));
     if (!tailored || !jd) return;
@@ -481,7 +473,6 @@ Return: {"matchScore":<0-100>,"matchingKeywords":[<list>],"missingKeywords":[<li
     setBoostLoading(false);
   }
 
-  // ── Generate Interview Prep ───────────────────────────────────────────────────
   async function generateInterviewPrep() {
     if (!jd || !tailored) return;
     setInterviewLoading(true); setErrorMsg('');
@@ -495,14 +486,7 @@ TAILORED RESUME: ${tailored}
 
 Return exactly this structure:
 {
-  "talkingPoints": [
-    "Talking point 1 — specific skill or achievement to highlight",
-    "Talking point 2",
-    "Talking point 3",
-    "Talking point 4",
-    "Talking point 5",
-    "Talking point 6"
-  ],
+  "talkingPoints": ["Talking point 1","Talking point 2","Talking point 3","Talking point 4","Talking point 5","Talking point 6"],
   "questions": [
     {
       "question": "Full interview question text?",
@@ -510,27 +494,27 @@ Return exactly this structure:
       "difficulty": "Medium",
       "whyAsked": "1-2 sentences explaining what the interviewer is assessing",
       "star": {
-        "Situation": "Specific situation from the candidate's experience to reference",
-        "Task": "What was the candidate's responsibility or goal in that situation",
-        "Action": "Specific actions taken — use metrics and keywords from the JD",
-        "Result": "Quantifiable outcome achieved — include % improvements or business impact"
+        "Situation": "Specific situation from the candidate's experience",
+        "Task": "Candidate's responsibility or goal",
+        "Action": "Specific actions taken with metrics and JD keywords",
+        "Result": "Quantifiable outcome with % improvements or business impact"
       },
       "keyPhrases": ["phrase1", "phrase2", "phrase3"]
     }
   ],
   "researchTips": [
-    { "icon": "🏭", "title": "Research tip title", "detail": "Specific actionable detail for this tip" }
+    { "icon": "🏭", "title": "Research tip title", "detail": "Specific actionable detail" }
   ]
 }
 
 Rules:
-- Generate exactly 10 questions in the questions array
-- Mix categories: at least 3 Behavioral, 3 Technical, 2 Situational, 1 Leadership, 1 General
+- Generate exactly 10 questions
+- Mix: at least 3 Behavioral, 3 Technical, 2 Situational, 1 Leadership, 1 General
 - Mix difficulties: Easy / Medium / Hard
-- STAR answers must reference the candidate's ACTUAL experience from the resume — be specific
-- talkingPoints must be exactly 6 items, each 1-2 sentences
-- researchTips must be exactly 6 items with relevant emojis
-- All content must be specific to pharmaceutical MES/data analytics domain`);
+- STAR answers must reference candidate's ACTUAL resume experience
+- talkingPoints: exactly 6 items, each 1-2 sentences
+- researchTips: exactly 6 items with relevant emojis
+- Domain: pharmaceutical MES/data analytics`);
       const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
       setInterviewPrep(parsed);
     } catch (err) {
@@ -540,7 +524,6 @@ Rules:
     setInterviewLoading(false);
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <>
       <style>{`
@@ -583,8 +566,18 @@ Rules:
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-          {/* ── INPUTS ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '14px', marginBottom: '14px', alignItems: 'start' }}>
+          {/* ── INPUTS + SCORE CARD ── */}
+          {/* 3-column grid: JD | Resume | ScoreCard (only when result exists) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: result
+              ? (isMobile ? '1fr' : '1fr 1fr 220px')
+              : (isMobile ? '1fr' : '1fr 1fr'),
+            gap: '14px',
+            marginBottom: '14px',
+            alignItems: 'stretch',
+          }}>
+            {/* JD */}
             <div style={{ ...card, marginBottom: 0 }}>
               <label style={labelStyle}>📋 Job Description</label>
               <textarea style={textarea} value={jd} onChange={e => setJd(e.target.value)} placeholder="Paste the full job description here..." />
@@ -592,6 +585,8 @@ Rules:
               <div style={{ fontSize: '11px', color: D.subtext, textAlign: 'center', margin: '5px 0 2px' }}>— or upload a file —</div>
               <FileUploadBox onFileRead={text => setJd(text)} dark={dark} />
             </div>
+
+            {/* Resume */}
             <div style={{ ...card, marginBottom: 0 }}>
               <label style={labelStyle}>📄 Your Resume</label>
               <textarea style={textarea} value={resume} onChange={e => setResume(e.target.value)} placeholder="Paste your resume text here..." />
@@ -599,6 +594,17 @@ Rules:
               <div style={{ fontSize: '11px', color: D.subtext, textAlign: 'center', margin: '5px 0 2px' }}>— or upload a file —</div>
               <FileUploadBox onFileRead={text => setResume(text)} dark={dark} />
             </div>
+
+            {/* Score Card — only appears after analysis, takes 3rd column */}
+            {result && (
+              <div style={{ marginBottom: 0 }}>
+                <ScoreCard
+                  originalScore={result?.matchScore ?? null}
+                  tailoredScore={tailoredScore?.matchScore ?? null}
+                  dark={dark}
+                />
+              </div>
+            )}
           </div>
 
           {/* ── ERROR ── */}
@@ -627,15 +633,7 @@ Rules:
           {/* ── RESULTS ── */}
           {result && (
             <>
-              {/* ── Score Card — full width above Section A ── */}
-              <ScoreCard
-                originalScore={result?.matchScore ?? null}
-                tailoredScore={tailoredScore?.matchScore ?? null}
-                isMobile={isMobile}
-                dark={dark}
-              />
-
-              {/* ════════════════════ SECTION A ══ */}
+              {/* ════════ SECTION A ════════ */}
               {sectionBanner('📊 Section A — Original Resume Analysis', '#1A3F6F')}
 
               <div style={{ ...card, background: dark ? '#1E3A5F' : '#EFF6FF', borderLeft: '4px solid #3B82F6' }}>
@@ -675,7 +673,7 @@ Rules:
                 </p>
               </div>
 
-              {/* ════════════════════ SECTION B ══ */}
+              {/* ════════ SECTION B ════════ */}
               {tailored && tailoredScore && (
                 <>
                   {sectionBanner('🎯 Section B — AI Custom Tailored Resume', '#10B981')}
@@ -743,7 +741,7 @@ Rules:
                 </>
               )}
 
-              {/* ════════════════════ SECTION C ══ */}
+              {/* ════════ SECTION C ════════ */}
               {coverLetter && (
                 <>
                   {sectionBanner('✉️ Section C — AI Generated Cover Letter', '#8B5CF6')}
@@ -775,39 +773,30 @@ Rules:
                 </>
               )}
 
-              {/* ════════════════════ SECTION D ══ */}
+              {/* ════════ SECTION D ════════ */}
               {coverLetter && (
                 <>
                   {sectionBanner('🎯 Section D — Interview Preparation', '#0369A1')}
-
                   <div style={{ ...card, background: dark ? '#0C1929' : '#F0F9FF', borderLeft: '4px solid #0369A1' }}>
                     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: '12px' }}>
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1', marginBottom: '4px' }}>
-                          AI-Powered Interview Prep
-                        </div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1', marginBottom: '4px' }}>AI-Powered Interview Prep</div>
                         <div style={{ fontSize: '12px', color: D.subtext, lineHeight: '1.5' }}>
                           10 tailored questions with STAR frameworks, key talking points & company research tips — based on your JD and tailored resume.
                         </div>
                       </div>
-                      <button
-                        onClick={generateInterviewPrep}
-                        disabled={interviewLoading}
-                        style={{
-                          padding: '10px 22px',
-                          background: interviewLoading ? '#6B7280' : 'linear-gradient(135deg, #0369A1, #0EA5E9)',
-                          color: 'white', border: 'none', borderRadius: '8px',
-                          fontSize: '12px', fontWeight: '700',
-                          cursor: interviewLoading ? 'not-allowed' : 'pointer',
-                          boxShadow: interviewLoading ? 'none' : '0 3px 10px rgba(3,105,161,0.35)',
-                          whiteSpace: 'nowrap', flexShrink: 0,
-                          width: isMobile ? '100%' : 'auto',
-                        }}
-                      >
+                      <button onClick={generateInterviewPrep} disabled={interviewLoading} style={{
+                        padding: '10px 22px',
+                        background: interviewLoading ? '#6B7280' : 'linear-gradient(135deg, #0369A1, #0EA5E9)',
+                        color: 'white', border: 'none', borderRadius: '8px',
+                        fontSize: '12px', fontWeight: '700',
+                        cursor: interviewLoading ? 'not-allowed' : 'pointer',
+                        boxShadow: interviewLoading ? 'none' : '0 3px 10px rgba(3,105,161,0.35)',
+                        whiteSpace: 'nowrap', flexShrink: 0, width: isMobile ? '100%' : 'auto',
+                      }}>
                         {interviewLoading ? '⏳ Generating...' : interviewPrep ? '🔄 Regenerate Prep' : '🎯 Generate Interview Prep'}
                       </button>
                     </div>
-
                     {interviewLoading && (
                       <div style={{ marginTop: '14px', background: dark ? '#1E3A5F' : '#E0F2FE', borderRadius: '8px', padding: '10px 14px' }}>
                         <div style={{ fontSize: '12px', color: dark ? '#7DD3FC' : '#0369A1', fontWeight: '600', marginBottom: '6px' }}>
@@ -823,9 +812,7 @@ Rules:
                   {interviewPrep && !interviewLoading && (
                     <>
                       <div style={card}>
-                        <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1', marginBottom: '12px' }}>
-                          🗣️ Key Talking Points to Emphasize
-                        </div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1', marginBottom: '12px' }}>🗣️ Key Talking Points to Emphasize</div>
                         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '8px' }}>
                           {(interviewPrep.talkingPoints || []).map((pt, i) => (
                             <div key={i} style={{
@@ -848,9 +835,7 @@ Rules:
 
                       <div style={card}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-                          <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1' }}>
-                            💬 10 Likely Interview Questions
-                          </div>
+                          <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1' }}>💬 10 Likely Interview Questions</div>
                           <div style={{ fontSize: '11px', color: D.subtext }}>Click any question to expand the STAR framework</div>
                         </div>
                         {(interviewPrep.questions || []).map((q, i) => (
@@ -859,9 +844,7 @@ Rules:
                       </div>
 
                       <div style={card}>
-                        <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1', marginBottom: '12px' }}>
-                          🔍 Company Research Tips
-                        </div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: dark ? '#7DD3FC' : '#0369A1', marginBottom: '12px' }}>🔍 Company Research Tips</div>
                         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '8px' }}>
                           {(interviewPrep.researchTips || []).map((tip, i) => (
                             <div key={i} style={{
@@ -883,7 +866,6 @@ Rules:
                   )}
                 </>
               )}
-
             </>
           )}
         </div>
